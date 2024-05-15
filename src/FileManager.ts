@@ -12,9 +12,9 @@ class FileManager{
   constructor(url: URL){
     this.url = url;
 
-    this.sitePath = `../storage/sites/${this.url.host}`;
-    this.imagePath = `../storage/images/${this.url.host}`;
-    this.indexPath = "../storage/index.json";
+    this.sitePath = `./storage/sites/${this.url.host}`;
+    this.imagePath = `./storage/images/${this.url.host}`;
+    this.indexPath = "./storage/index.json";
 
     fs.mkdirSync(this.sitePath,{ recursive: true });
     fs.mkdirSync(this.imagePath,{ recursive: true });
