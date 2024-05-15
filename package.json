@@ -4,6 +4,8 @@
   "description": "Webクローラー",
   "main": "index.js",
   "scripts": {
+    "start": "npx ts-node src/index.ts",
+    "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,10 +20,11 @@
   "homepage": "https://github.com/Taka005/Crawler#readme",
   "devDependencies": {
     "@types/node": "^20.12.12",
-    "@types/puppeteer": "^7.0.4",
-    "typescript": "^5.4.5"
+    "@types/puppeteer": "^7.0.4"
   },
   "dependencies": {
-    "puppeteer": "^22.8.2"
+    "puppeteer": "^22.8.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }

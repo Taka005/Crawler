@@ -1,43 +1,46 @@
 import path from "path";
-import { Page, Browser } from "puppeteer";
-import fm from "./SiteManager";
+import { Page, Browser, HTTPResponse } from "puppeteer";
+import FileManager from "./FileManager";
+import log from "./Log";
 
 interface Crawler{
   browser: Browser
   url: URL,
-  sitePath: string,
-  imagePath: string
+  manager: FileManager
 }
 
 class Crawler{
   constructor(browser: Browser,url: string){
     this.browser = browser;
     this.url = new URL(url);
+    this.manager = new FileManager(this.url);
 
-    this.sitePath = `../storage/sites/${this.url.hostname}`;
-    this.imagePath = `../storage/sites/${this.url.hostname}`;
-
-
-    fm.mkDir(this.sitePath);
-    fm.mkDir(this.imagePath);
+    log.info("クローラーが起動しました");
   }
 
   async run(): Promise<void>{
+    log.info(`クローラーを"${this.url.host}"で実行します`);
+
     const page: Page = await this.browser.newPage();
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 });
     await page.goto(this.url.href);
 
-    page.on("response",async(res)=>{
+    page.on("response",async(res: HTTPResponse)=>{
       const buffer: Buffer = await res.buffer();
       const url: URL = new URL(res.url());
 
-      fm.mkDir(`${this.sitePath}/${path.dirname(url.pathname)}`);
-      fm.addFile(`${this.sitePath}/${url.pathname}`,buffer);
-    })
+      if(url.host !== this.url.host) return;
+
+      //fm.mkDir(`${this.sitePath}/${path.dirname(url.pathname)}`);
+      //fm.addFile(`${this.sitePath}/${url.pathname}`,buffer);
+    });
+
+    await this.scrollAll(page);
+    await this.getThumbnail(page);
   }
 
-  async shot(page: Page): Promise<void>{
-    await page.screenshot({ path: `${this.imagePath}/${this.url.hostname}.png`, fullPage: true });
+  async getThumbnail(page: Page): Promise<void>{
+    await page.screenshot({ path: this.manager.thumbnailPath, fullPage: true });
   }
 
   async scrollAll(page: Page): Promise<void>{
@@ -56,7 +59,7 @@ class Crawler{
         },100);
       });
 
-      scrollBy(0,0);
+      scrollTo(0,0);
     });
   }
 }
