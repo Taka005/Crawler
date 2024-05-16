@@ -1,48 +1,73 @@
 import fs from "fs";
 import log from "./Log";
+import utils from "./utils";
 
 interface FileManager{
-  url: URL,
-  sitePath: string,
-  imagePath: string,
-  indexPath: string
+  host: string;
+  sitePath: string;
+  imagePath: string;
+  indexPath: string;
 }
 
 type SiteData = {
-  host: string,
-  title: string | null,
-  description: string | null,
-  thumbnail: string,
-  files: string[],
-  images: string[],
-  createAt: Date
+  host: string;
+  pages: PageData[]
+}
+
+type PageData = {
+  path: string;
+  title: string | null;
+  description: string | null;
+  thumbnail: string;
+  createAt: Date;
+}
+
+type IndexData = {
+  [key: string]: SiteData;
 }
 
 class FileManager{
-  constructor(url: URL){
-    this.url = url;
+  constructor(host: string){
+    this.host = host;
 
-    this.sitePath = `./storage/sites/${this.url.host}`;
-    this.imagePath = "./storage/images";
+    this.sitePath = `./storage/sites/${this.host}`;
+    this.imagePath = `./storage/images/${this.host}`;
     this.indexPath = "./storage/index.json";
 
     fs.mkdirSync(this.sitePath,{ recursive: true });
     fs.mkdirSync(this.imagePath,{ recursive: true });
-    this.addFile(this.indexPath,JSON.stringify([]));
+    this.addFile(this.indexPath,JSON.stringify({}));
   }
 
-  get thumbnailPath(): string{
-    return `${this.imagePath}/${this.url.host}.png`;
+  getThumbnailPath(path: string): string{
+    return `${this.imagePath}/${utils.pathToString(utils.parseFilePath(path))}.png`;
   }
 
-  addIndex(data: SiteData): void{
-    const index = JSON.parse(fs.readFileSync(this.indexPath,"utf8"));
+  getIndex(): IndexData{
+    return JSON.parse(fs.readFileSync(this.indexPath,"utf8"));
+  }
 
-    index.push(data);
+  addIndex(host: string): void{
+    const index: IndexData = this.getIndex();
 
-    this.addFile(this.indexPath,JSON.stringify(index),true)
+    index[this.host] = {
+      host: host,
+      pages: []
+    } as SiteData;
 
-    log.info("インデックスを作成しました");
+    this.addFile(this.indexPath,JSON.stringify(index,null,"   "),true)
+
+    log.info(`"${this.host}"のインデックスを作成しました`);
+  }
+
+  addPage(data: PageData): void{
+    const index: IndexData = this.getIndex();
+
+    index[this.host].pages.push(data);
+
+    this.addFile(this.indexPath,JSON.stringify(index,null,"   "),true)
+
+    log.info(`"${data.path}"のページを追加しました`);
   }
 
   addSiteDir(path: string): void{
@@ -53,8 +78,14 @@ class FileManager{
     if(!fs.existsSync(path)||force){
       fs.writeFileSync(path,data);
 
-      log.info(`${path}を新規作成しました`);
+      log.info(`${path}を${force ? "更新" : "新規作成"}しました`);
     }
+  }
+
+  getPage(path: string): PageData | null{
+    const index: IndexData = this.getIndex();
+
+    return index[this.host].pages.find(page=>page.path === path)||null;
   }
 }
 
