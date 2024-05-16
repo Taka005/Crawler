@@ -1,4 +1,4 @@
-import path from "path";
+import { dirname } from "path";
 import { Page, Browser, HTTPResponse } from "puppeteer";
 import FileManager from "./FileManager";
 import log from "./Log";
@@ -31,16 +31,39 @@ class Crawler{
 
       if(url.host !== this.url.host) return;
 
-      //fm.mkDir(`${this.sitePath}/${path.dirname(url.pathname)}`);
-      //fm.addFile(`${this.sitePath}/${url.pathname}`,buffer);
+      this.manager.addSiteDir(dirname(url.pathname));
+      this.manager.addFile(url.pathname,buffer);
     });
 
     await this.scrollAll(page);
     await this.getThumbnail(page);
+
+    this.manager.addIndex({
+      host: this.url.host,
+      title: await this.getTitle(page),
+      description: await this.getDescription(page),
+      thumbnail: this.manager.thumbnailPath,
+      files: [],
+      images: [],
+      createAt: new Date()
+    });
   }
 
   async getThumbnail(page: Page): Promise<void>{
     await page.screenshot({ path: this.manager.thumbnailPath, fullPage: true });
+  }
+
+  async getTitle(page: Page): Promise<string | null>{
+    return await page.evaluate(async()=>{
+      return document.title || null;
+    });
+  }
+
+  async getDescription(page: Page): Promise<string | null>{
+    return await page.evaluate(async()=>{
+      const meta = document.querySelector("meta[name='description']");
+      return meta ? meta.getAttribute("content") : null;
+    });
   }
 
   async scrollAll(page: Page): Promise<void>{

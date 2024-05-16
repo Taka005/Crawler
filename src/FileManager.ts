@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import fs from "fs";
 import log from "./Log";
 
 interface FileManager{
@@ -6,6 +6,16 @@ interface FileManager{
   sitePath: string,
   imagePath: string,
   indexPath: string
+}
+
+type SiteData = {
+  host: string,
+  title: string | null,
+  description: string | null,
+  thumbnail: string,
+  files: string[],
+  images: string[],
+  createAt: Date
 }
 
 class FileManager{
@@ -25,8 +35,14 @@ class FileManager{
     return `${this.imagePath}/${this.url.host}.png`;
   }
 
-  addIndex(): void{
+  addIndex(data: SiteData): void{
     const index = JSON.parse(fs.readFileSync(this.indexPath,"utf8"));
+
+    index.push(data);
+  }
+
+  addSiteDir(path: string): void{
+    fs.mkdirSync(`${this.sitePath}/${path}`,{ recursive: true});
   }
 
   addFile(path: string,data: string | NodeJS.ArrayBufferView,force: boolean = false): void{
