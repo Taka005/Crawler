@@ -39,6 +39,10 @@ class FileManager{
     const index = JSON.parse(fs.readFileSync(this.indexPath,"utf8"));
 
     index.push(data);
+
+    this.addFile(this.indexPath,JSON.stringify(index),true)
+
+    log.info("インデックスを作成しました");
   }
 
   addSiteDir(path: string): void{
