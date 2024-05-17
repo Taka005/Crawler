@@ -42,7 +42,9 @@ class Crawler{
     setInterval(()=>{
       this.queue.split(config.crawlLimit)
         .map(async(url)=>{
-          if(this.completes.find(com=>com === url.pathname)) return;
+          if(this.completes.find(com=>com === url.pathname)){
+            return this.queue.remove(url);
+          }
 
           this.run(url);
           this.completes.push(url.pathname);
@@ -61,7 +63,7 @@ class Crawler{
     await this.setConfig(page);
 
     await page.goto(url.href);
-    
+
     await this.scrollAll(page);
     await this.getThumbnail(page,url.pathname);
 
