@@ -27,9 +27,6 @@ class LinkManager{
   }
 
   add(url: string): void{
-    const link = this.get(url);
-    if(link) return;
-
     this.data.push(new Link(url));
   }
 

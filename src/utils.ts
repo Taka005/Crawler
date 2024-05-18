@@ -43,4 +43,8 @@ function createId(value: string): string{
   return id;
 }
 
-export default { parseFilePath, getSLD, isSameDomain, isValidURL, createId };
+function sleep(ms: number): Promise<void>{
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+export default { parseFilePath, getSLD, isSameDomain, isValidURL, createId, sleep };

@@ -29,7 +29,9 @@ class Crawler{
   async start(): Promise<void>{
     log.info(`クローラーを"${this.host}"で実行します`);
 
-    this.manager.addIndex(this.host);
+    if(config.isOverWrite||!this.manager.getIndex()[this.host]){
+      this.manager.addIndex(this.host);
+    }
 
     setInterval(()=>{
       this.links.split(config.crawlLimit)
@@ -55,13 +57,22 @@ class Crawler{
 
     await page.goto(url.href);
 
-    const imageId: string = utils.createId(url.pathname+url.search);
+    await utils.sleep(config.waitTime);
 
     await this.scrollAll(page);
-    await this.getThumbnail(page,imageId);
 
     const links = await this.getLinks(page,url);
-    links.forEach(link=>this.links.add(link));
+    links.forEach(link=>{
+      if(this.links.get(link)) return;
+
+      this.links.add(link);
+    });
+
+    if(!config.isOverWrite&&this.isAccessed(url)) return;
+
+    const imageId: string = utils.createId(url.pathname+url.search);
+
+    await this.getThumbnail(page,imageId);
 
     this.manager.addPage({
       path: utils.parseFilePath(url.pathname)+url.search,
@@ -74,6 +85,10 @@ class Crawler{
     });
 
     await page.close();
+  }
+
+  isAccessed(url: URL): boolean{
+    return !!this.manager.getPage(utils.parseFilePath(url.pathname)+url.search);
   }
 
   async getThumbnail(page: Page,id: string): Promise<void>{
