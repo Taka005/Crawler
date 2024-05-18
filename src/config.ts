@@ -1,12 +1,17 @@
-type config = {
+type Config = {
   crawlLimit: number;
   crawlInterval: number;
-  userAgent?: string;
+  isOnlySameDomain: boolean;
+  userAgent: string | null;
+  isDebug: boolean; 
 }
 
-const config = {
+const config: Config = {
   crawlLimit: 3,
-  crawlInterval: 8000
+  crawlInterval: 8000,
+  isOnlySameDomain: true,
+  userAgent: null,
+  isDebug: false
 }
 
 export default config;

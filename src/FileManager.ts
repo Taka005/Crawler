@@ -57,7 +57,7 @@ class FileManager{
 
     this.addFile(this.indexPath,JSON.stringify(index,null,"    "),true)
 
-    log.info(`"${this.host}"のインデックスを作成しました`);
+    log.debug(`"${this.host}"のインデックスを作成しました`);
   }
 
   addPage(data: PageData): void{
@@ -67,7 +67,7 @@ class FileManager{
 
     this.addFile(this.indexPath,JSON.stringify(index,null,"   "),true)
 
-    log.info(`"${data.path}"のページを追加しました`);
+    log.debug(`"${data.path}"のページを追加しました`);
   }
 
   addSiteDir(path: string): void{
@@ -78,7 +78,7 @@ class FileManager{
     if(!fs.existsSync(path)||force){
       fs.writeFileSync(path,data);
 
-      log.info(`${path}を${force ? "更新" : "新規作成"}しました`);
+      log.debug(`${path}を${force ? "更新" : "新規作成"}しました`);
     }
   }
 

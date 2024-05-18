@@ -50,7 +50,7 @@ class Crawler{
   }
 
   async run(url: URL): Promise<void>{
-    log.info(`"${url.pathname}${url.search}"をクロールしています`);
+    log.info(`"${utils.parseFilePath(url.pathname)}${url.search}"をクロールしています`);
 
     const page: Page = await this.browser.newPage();
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 });
@@ -124,7 +124,7 @@ class Crawler{
           return path.join(url.href,link);
         }
       })
-      .filter(link=>utils.isValidURL(link)&&utils.isSameSLD(url,new URL(link)));
+      .filter(link=>utils.isValidURL(link)&&utils.isSameDomain(url,new URL(link)));
 
     return [...new Set(urls)];
   }

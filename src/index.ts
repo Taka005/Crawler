@@ -7,6 +7,4 @@ import Crawler from "./Crawler";
     });
     const crawler: Crawler = new Crawler(browser,"https://www.takasumibot.com/");
     await crawler.start();
-
-    //browser.close();
 })()

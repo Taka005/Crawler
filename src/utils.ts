@@ -1,3 +1,5 @@
+import config from "./config";
+
 function parseFilePath(path: string): string{
   return path === "/" ? "/index.html" : path
 }
@@ -11,10 +13,16 @@ function getSLD(host: string): string | null{
   return parts.slice(-2).join(".");
 }
 
-function isSameSLD(source: URL,target: URL): boolean{
-  const sld1 = getSLD(source.hostname);
-  const sld2 = getSLD(target.hostname);
-  return sld1 !== null && sld1 === sld2;
+function isSameDomain(source: URL,target: URL): boolean{
+  if(config.isOnlySameDomain){
+    return source.hostname === target.hostname;
+  }else{
+    const sld1 = getSLD(source.hostname);
+    const sld2 = getSLD(target.hostname);
+    if(!sld1||!sld2) return false;
+
+    return sld1 === sld2;
+  }
 }
 
 function isValidURL(value: string): boolean{
@@ -36,4 +44,4 @@ function createId(length: number){
   return id;
 }
 
-export default { parseFilePath, getSLD, isSameSLD, isValidURL, createId };
+export default { parseFilePath, getSLD, isSameDomain, isValidURL, createId };

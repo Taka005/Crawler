@@ -1,3 +1,5 @@
+import config from "./config";
+
 class Log{
   static getDate(): string{
     const now: Date = new Date();
@@ -17,6 +19,8 @@ class Log{
   }
 
   static debug(message: string): void{
+    if(!config.isDebug) return;
+
     console.debug(`\x1b[34m${this.getDate()} [DEBUG] ${message}\x1b[39m`);
   }
 }
