@@ -11,7 +11,6 @@ interface Crawler{
   host: string;
   manager: FileManager;
   links: LinkManager;
-  completes: string[];
 }
 
 class Crawler{
@@ -20,11 +19,9 @@ class Crawler{
 
     this.links = new LinkManager();
     this.links.add(url);
-    this.host = new URL(url).host;
+    this.host = new URL(url).hostname;
 
     this.manager = new FileManager(this.host);
-
-    this.completes = [];
 
     log.info("クローラーが起動しました");
   }
@@ -58,10 +55,12 @@ class Crawler{
 
     await page.goto(url.href);
 
-    await this.scrollAll(page);
-    const imageId: string = await this.getThumbnail(page);
+    const imageId: string = utils.createId(url.pathname+url.search);
 
-    const links = await this.getLinks(url,page);
+    await this.scrollAll(page);
+    await this.getThumbnail(page,imageId);
+
+    const links = await this.getLinks(page,url);
     links.forEach(link=>this.links.add(link));
 
     this.manager.addPage({
@@ -70,30 +69,15 @@ class Crawler{
       description: await this.getDescription(page),
       thumbnail: this.manager.getThumbnailPath(imageId),
       links: links,
+      images: await this.getImages(page),
       createAt: new Date()
     });
 
     await page.close();
   }
 
-  async download(page: Page): Promise<void>{
-    page.on("response",async(res: HTTPResponse)=>{
-      const buffer: Buffer = await res.buffer();
-      const url: URL = new URL(res.url());
-
-      if(url.host !== this.host) return;
-
-      this.manager.addSiteDir(path.dirname(url.pathname));
-      this.manager.addFile(url.pathname,buffer);
-    });
-  }
-
-  async getThumbnail(page: Page): Promise<string>{
-    const id = utils.createId(8);
-
+  async getThumbnail(page: Page,id: string): Promise<void>{
     await page.screenshot({ path: this.manager.getThumbnailPath(id), fullPage: true });
-
-    return id;
   }
 
   async getTitle(page: Page): Promise<string | null>{
@@ -109,11 +93,11 @@ class Crawler{
     });
   }
 
-  async getLinks(url: URL,page: Page): Promise<string[]>{
+  async getLinks(page: Page,url: URL): Promise<string[]>{
     const links = await page.evaluate(()=>{
       return Array.from(document.querySelectorAll("a"))
         .map(tag=>tag.href)
-        .filter(href=>href)
+        .filter(href=>href);
     });
 
     const urls = links
@@ -127,6 +111,14 @@ class Crawler{
       .filter(link=>utils.isValidURL(link)&&utils.isSameDomain(url,new URL(link)));
 
     return [...new Set(urls)];
+  }
+
+  async getImages(page: Page): Promise<string[]>{
+    return await page.evaluate(()=>{
+      return Array.from(document.querySelectorAll("img"))
+        .map(img=>img.src)
+        .filter(src=>src);
+    });
   }
 
   async scrollAll(page: Page): Promise<void>{
@@ -145,7 +137,18 @@ class Crawler{
         },100);
       });
 
-      scrollTo(0,0);
+      await new Promise<void>((resolve)=>{
+        let totalHeight: number = document.body.scrollHeight
+        const distance: number = -100
+        const timer: NodeJS.Timeout = setInterval(()=>{
+          scrollBy(0,distance);
+          totalHeight += distance;
+          if(totalHeight <= 0){
+            clearInterval(timer);
+            resolve();
+          }
+        },100);
+      });
     });
   }
 
