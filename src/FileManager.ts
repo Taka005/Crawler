@@ -40,8 +40,8 @@ class FileManager{
     this.addFile(this.indexPath,JSON.stringify({}));
   }
 
-  getThumbnailPath(path: string): string{
-    return `${this.imagePath}/${utils.pathToString(utils.parseFilePath(path))}.png`;
+  getThumbnailPath(id: string): string{
+    return `${this.imagePath}/${id}.png`;
   }
 
   getIndex(): IndexData{

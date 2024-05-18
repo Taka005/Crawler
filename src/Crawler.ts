@@ -34,12 +34,7 @@ class Crawler{
 
     this.manager.addIndex(this.host);
 
-    const link = this.links.first();
-    this.run(new URL(link.url));
-    link.setComplete(true);
-
     setInterval(()=>{
-      console.log(this.links.split(config.crawlLimit))
       this.links.split(config.crawlLimit)
         .map(async(link)=>{
           if(link.isComplete) return;
@@ -47,7 +42,7 @@ class Crawler{
           this.run(new URL(link.url));
           link.setComplete(true);
         });
-    },10000);
+    },config.crawlInterval);
   }
 
   async stop(): Promise<void>{
@@ -55,6 +50,8 @@ class Crawler{
   }
 
   async run(url: URL): Promise<void>{
+    log.info(`"${url.pathname}${url.search}"をクロールしています`);
+
     const page: Page = await this.browser.newPage();
     await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 });
     await this.setConfig(page);
@@ -62,16 +59,16 @@ class Crawler{
     await page.goto(url.href);
 
     await this.scrollAll(page);
-    await this.getThumbnail(page,encodeURIComponent(url.pathname+url.search));
+    const imageId: string = await this.getThumbnail(page);
 
     const links = await this.getLinks(url,page);
     links.forEach(link=>this.links.add(link));
 
     this.manager.addPage({
-      path: utils.parseFilePath(url.pathname+url.search),
+      path: utils.parseFilePath(url.pathname)+url.search,
       title: await this.getTitle(page),
       description: await this.getDescription(page),
-      thumbnail: this.manager.getThumbnailPath(url.pathname+url.search),
+      thumbnail: imageId,
       links: links,
       createAt: new Date()
     });
@@ -91,8 +88,12 @@ class Crawler{
     });
   }
 
-  async getThumbnail(page: Page,path: string): Promise<void>{
-    await page.screenshot({ path: this.manager.getThumbnailPath(path), fullPage: true });
+  async getThumbnail(page: Page): Promise<string>{
+    const id = utils.createId(8);
+
+    await page.screenshot({ path: this.manager.getThumbnailPath(id), fullPage: true });
+
+    return id;
   }
 
   async getTitle(page: Page): Promise<string | null>{

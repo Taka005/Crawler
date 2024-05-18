@@ -2,10 +2,6 @@ function parseFilePath(path: string): string{
   return path === "/" ? "/index.html" : path
 }
 
-function pathToString(path: string): string{
-  return path.slice(1).replace(/\//g,".");
-}
-
 function getSLD(host: string): string | null{
   const parts = host.split(".");
   if(parts.length < 2){
@@ -30,4 +26,14 @@ function isValidURL(value: string): boolean{
   }
 }
 
-export default { parseFilePath, pathToString, getSLD, isSameSLD, isValidURL };
+function createId(length: number){
+  const str: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let id: string = "";
+  for(let i = 0;i < length;i++){
+    id += str.charAt(Math.floor(Math.random()*str.length));
+  }
+
+  return id;
+}
+
+export default { parseFilePath, getSLD, isSameSLD, isValidURL, createId };
