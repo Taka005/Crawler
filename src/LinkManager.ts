@@ -1,8 +1,8 @@
 interface LinkManager{
-  queues: Queue[];
+  queues: Link[];
 }
 
-interface Queue{
+interface Link{
   url: string;
   isComplete: boolean;
 }
@@ -12,11 +12,11 @@ class LinkManager{
     this.queues = [];
   }
 
-  first(): Queue{
+  first(): Link{
     return this.queues[0];
   }
 
-  split(value: number): Queue[]{
+  split(value: number): Link[]{
     if(value > this.queues.length){
       value = this.queues.length;
     }
@@ -26,7 +26,7 @@ class LinkManager{
       .slice(0,value+1);
   }
 
-  get(url: string): Queue{
+  get(url: string): Link{
     return this.queues.filter(q=>q.url === url)[0]
   }
 
@@ -34,15 +34,15 @@ class LinkManager{
     const link = this.get(url);
     if(link) return;
 
-    this.queues.push(new Queue(url));
+    this.queues.push(new Link(url));
   }
 
-  remove(queue: Queue): void{
+  remove(queue: Link): void{
     this.queues = this.queues.filter(q=>q.url === queue.url);
   }
 }
 
-class Queue{
+class Link{
   constructor(url: string){
     this.url = url
     this.isComplete = false;
