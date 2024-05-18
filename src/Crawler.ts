@@ -1,7 +1,7 @@
 import path from "path";
 import { Page, Browser, HTTPResponse } from "puppeteer";
 import FileManager from "./FileManager";
-import QueueManager from "./QueueManager";
+import LinkManager from "./LinkManager";
 import log from "./Log";
 import utils from "./utils";
 import config from "./config";
@@ -10,7 +10,7 @@ interface Crawler{
   browser: Browser;
   host: string;
   manager: FileManager;
-  queue: QueueManager;
+  links: LinkManager;
   completes: string[];
 }
 
@@ -18,8 +18,8 @@ class Crawler{
   constructor(browser: Browser,url: string){
     this.browser = browser;
 
-    this.queue = new QueueManager();
-    this.queue.add(url);
+    this.links = new LinkManager();
+    this.links.add(url);
     this.host = new URL(url).host;
 
     this.manager = new FileManager(this.host);
@@ -34,22 +34,18 @@ class Crawler{
 
     this.manager.addIndex(this.host);
 
-    const link = this.queue.first();
-    this.run(new URL(link));
-    this.completes.push(link);
-    this.queue.remove(link);
+    const link = this.links.first();
+    this.run(new URL(link.url));
+    link.setComplete(true);
 
     setInterval(()=>{
-      console.log(this.queue.queues)
-      this.queue.split(config.crawlLimit)
+      console.log(this.links.split(config.crawlLimit))
+      this.links.split(config.crawlLimit)
         .map(async(link)=>{
-          if(this.completes.find(com=>com === link)){
-            return this.queue.remove(link);
-          }
+          if(link.isComplete) return;
 
-          this.run(new URL(link));
-          this.completes.push(link);
-          this.queue.remove(link);
+          this.run(new URL(link.url));
+          link.setComplete(true);
         });
     },10000);
   }
@@ -66,17 +62,17 @@ class Crawler{
     await page.goto(url.href);
 
     await this.scrollAll(page);
-    await this.getThumbnail(page,url.pathname);
+    await this.getThumbnail(page,encodeURIComponent(url.pathname+url.search));
 
     const links = await this.getLinks(url,page);
-    links.forEach(link=>this.queue.add(link));
+    links.forEach(link=>this.links.add(link));
 
     this.manager.addPage({
-      path: utils.parseFilePath(url.pathname),
+      path: utils.parseFilePath(url.pathname+url.search),
       title: await this.getTitle(page),
       description: await this.getDescription(page),
-      thumbnail: this.manager.getThumbnailPath(url.pathname),
-      links: await this.getLinks(url,page),
+      thumbnail: this.manager.getThumbnailPath(url.pathname+url.search),
+      links: links,
       createAt: new Date()
     });
 
