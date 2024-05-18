@@ -1,5 +1,5 @@
 interface QueueManager {
-  queues: URL[];
+  queues: string[];
 }
 
 class QueueManager{
@@ -7,11 +7,11 @@ class QueueManager{
     this.queues = [];
   }
 
-  first(): URL{
+  first(): string{
     return this.queues[0];
   }
 
-  split(value: number): URL[]{
+  split(value: number): string[]{
     if(value > this.queues.length){
       value = this.queues.length;
     }
@@ -19,12 +19,12 @@ class QueueManager{
     return this.queues.slice(0,value+1);
   }
 
-  add(queue: URL): void{
+  add(queue: string): void{
     this.queues.push(queue);
   }
 
-  remove(queue: URL): void{
-    this.queues = this.queues.filter(q=>q.href === queue.href);
+  remove(queue: string): void{
+    this.queues = this.queues.filter(q=>q === queue);
   }
 }
 

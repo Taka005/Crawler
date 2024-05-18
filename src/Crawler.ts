@@ -19,8 +19,8 @@ class Crawler{
     this.browser = browser;
 
     this.queue = new QueueManager();
-    this.queue.add(new URL(url));
-    this.host = this.queue.first().host;
+    this.queue.add(url);
+    this.host = new URL(url).host;
 
     this.manager = new FileManager(this.host);
 
@@ -34,21 +34,22 @@ class Crawler{
 
     this.manager.addIndex(this.host);
 
-    const url = this.queue.first();
-    this.run(url);
-    this.completes.push(url.pathname);
-    this.queue.remove(url);
+    const link = this.queue.first();
+    this.run(new URL(link));
+    this.completes.push(link);
+    this.queue.remove(link);
 
     setInterval(()=>{
+      console.log(this.queue.queues)
       this.queue.split(config.crawlLimit)
-        .map(async(url)=>{
-          if(this.completes.find(com=>com === url.pathname)){
-            return this.queue.remove(url);
+        .map(async(link)=>{
+          if(this.completes.find(com=>com === link)){
+            return this.queue.remove(link);
           }
 
-          this.run(url);
-          this.completes.push(url.pathname);
-          this.queue.remove(url);
+          this.run(new URL(link));
+          this.completes.push(link);
+          this.queue.remove(link);
         });
     },10000);
   }
@@ -68,7 +69,7 @@ class Crawler{
     await this.getThumbnail(page,url.pathname);
 
     const links = await this.getLinks(url,page);
-    links.forEach(link=>this.queue.add(new URL(link)));
+    links.forEach(link=>this.queue.add(link));
 
     this.manager.addPage({
       path: utils.parseFilePath(url.pathname),
@@ -82,12 +83,12 @@ class Crawler{
     await page.close();
   }
 
-  async download(page: Page,host: string): Promise<void>{
+  async download(page: Page): Promise<void>{
     page.on("response",async(res: HTTPResponse)=>{
       const buffer: Buffer = await res.buffer();
       const url: URL = new URL(res.url());
 
-      if(url.host !== host) return;
+      if(url.host !== this.host) return;
 
       this.manager.addSiteDir(path.dirname(url.pathname));
       this.manager.addFile(url.pathname,buffer);
