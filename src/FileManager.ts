@@ -1,6 +1,5 @@
 import fs from "fs";
 import log from "./Log";
-import utils from "./utils";
 
 interface FileManager{
   host: string;
@@ -56,7 +55,7 @@ class FileManager{
       pages: []
     } as SiteData;
 
-    this.addFile(this.indexPath,JSON.stringify(index,null,"   "),true)
+    this.addFile(this.indexPath,JSON.stringify(index,null,"    "),true)
 
     log.info(`"${this.host}"のインデックスを作成しました`);
   }
@@ -86,7 +85,7 @@ class FileManager{
   getPage(path: string): PageData | null{
     const index: IndexData = this.getIndex();
 
-    return index[this.host].pages.find(page=>page.path === path)||null;
+    return index[this.host].pages.find(page=>page.path === path) || null;
   }
 }
 

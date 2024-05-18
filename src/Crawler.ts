@@ -68,7 +68,7 @@ class Crawler{
       path: utils.parseFilePath(url.pathname)+url.search,
       title: await this.getTitle(page),
       description: await this.getDescription(page),
-      thumbnail: imageId,
+      thumbnail: this.manager.getThumbnailPath(imageId),
       links: links,
       createAt: new Date()
     });
