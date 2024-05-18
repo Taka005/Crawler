@@ -70,15 +70,17 @@ class Crawler{
 
     if(!config.isOverWrite&&this.isAccessed(url)) return;
 
-    const imageId: string = utils.createId(url.pathname+url.search);
+    const saveId: string = utils.createId(url.pathname+url.search);
 
-    await this.getThumbnail(page,imageId);
+    await this.getThumbnail(page,saveId);
+    await this.getPDF(page,saveId);
 
     this.manager.addPage({
       path: utils.parseFilePath(url.pathname)+url.search,
       title: await this.getTitle(page),
       description: await this.getDescription(page),
-      thumbnail: this.manager.getThumbnailPath(imageId),
+      thumbnail: this.manager.getThumbnailPath(saveId),
+      view: this.manager.getPDFPath(saveId),
       links: links,
       images: await this.getImages(page),
       createAt: new Date()
@@ -93,6 +95,11 @@ class Crawler{
 
   async getThumbnail(page: Page,id: string): Promise<void>{
     await page.screenshot({ path: this.manager.getThumbnailPath(id), fullPage: true });
+  }
+
+  async getPDF(page: Page,id: string): Promise<void>{
+    await page.emulateMediaType("screen");
+    await page.pdf({ path: this.manager.getPDFPath(id) });
   }
 
   async getTitle(page: Page): Promise<string | null>{

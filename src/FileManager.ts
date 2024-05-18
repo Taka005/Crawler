@@ -4,7 +4,7 @@ import log from "./Log";
 interface FileManager{
   host: string;
   sitePath: string;
-  imagePath: string;
+  savePath: string;
   indexPath: string;
 }
 
@@ -18,6 +18,7 @@ type PageData = {
   title: string | null;
   description: string | null;
   thumbnail: string;
+  view: string;
   links: string[];
   images: string[];
   createAt: Date;
@@ -31,17 +32,19 @@ class FileManager{
   constructor(host: string){
     this.host = host;
 
-    this.sitePath = `./storage/sites/${this.host}`;
-    this.imagePath = `./storage/images/${this.host}`;
+    this.savePath = `./storage/${this.host}`;
     this.indexPath = "./storage/index.json";
 
-    fs.mkdirSync(this.sitePath,{ recursive: true });
-    fs.mkdirSync(this.imagePath,{ recursive: true });
+    fs.mkdirSync(this.savePath,{ recursive: true });
     this.addFile(this.indexPath,JSON.stringify({}));
   }
 
   getThumbnailPath(id: string): string{
-    return `${this.imagePath}/${id}.png`;
+    return `${this.savePath}/${id}.png`;
+  }
+
+  getPDFPath(id: string): string{
+    return `${this.savePath}/${id}.pdf`;
   }
 
   getIndex(): IndexData{
