@@ -68,27 +68,30 @@ class Crawler{
     await this.getThumbnail(page,url.pathname);
 
     const links = await this.getLinks(url,page);
-    links.forEach(link=>this.queue.add(link));
+    links.forEach(link=>this.queue.add(new URL(link)));
 
     this.manager.addPage({
       path: utils.parseFilePath(url.pathname),
       title: await this.getTitle(page),
       description: await this.getDescription(page),
       thumbnail: this.manager.getThumbnailPath(url.pathname),
+      links: await this.getLinks(url,page),
       createAt: new Date()
     });
 
+    await page.close();
+  }
+
+  async download(page: Page,host: string): Promise<void>{
     page.on("response",async(res: HTTPResponse)=>{
       const buffer: Buffer = await res.buffer();
       const url: URL = new URL(res.url());
 
-      if(url.host !== url.host) return;
+      if(url.host !== host) return;
 
       this.manager.addSiteDir(path.dirname(url.pathname));
       this.manager.addFile(url.pathname,buffer);
     });
-
-    await page.close();
   }
 
   async getThumbnail(page: Page,path: string): Promise<void>{
@@ -108,7 +111,7 @@ class Crawler{
     });
   }
 
-  async getLinks(url: URL,page: Page): Promise<URL[]>{
+  async getLinks(url: URL,page: Page): Promise<string[]>{
     const links = await page.evaluate(()=>{
       return Array.from(document.querySelectorAll("a"))
         .map(tag=>tag.href)
@@ -123,8 +126,7 @@ class Crawler{
           return path.join(url.href,link);
         }
       })
-      .filter(link=>utils.isValidURL(link)&&utils.isSameSLD(url,new URL(link)))
-      .map(link=>new URL(link));
+      .filter(link=>utils.isValidURL(link)&&utils.isSameSLD(url,new URL(link)));
 
     return [...new Set(urls)];
   }

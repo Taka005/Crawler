@@ -19,6 +19,7 @@ type PageData = {
   title: string | null;
   description: string | null;
   thumbnail: string;
+  links: string[]
   createAt: Date;
 }
 
