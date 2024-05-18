@@ -1,5 +1,5 @@
 import path from "path";
-import { Page, Browser, HTTPResponse } from "puppeteer";
+import { Page, Browser } from "puppeteer";
 import FileManager from "./FileManager";
 import LinkManager from "./LinkManager";
 import log from "./Log";
