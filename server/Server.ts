@@ -10,9 +10,16 @@ class Server{
     this.app = express();
 
     this.app.set("view engine","ejs");
+    this.app.use(express.static("public"));
 
     this.app.listen(port,()=>{
       log.info(`${port}番ポートで起動しました`);
+    });
+
+    this.app.use((req: express.Request,res: express.Response,next: express.NextFunction)=>{
+      log.info(`${req.ip} - [${req.method}] ${req.originalUrl}`);
+    
+      next();
     });
 
     this.app.get("/",(req: express.Request,res: express.Response)=>{
