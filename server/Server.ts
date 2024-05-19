@@ -1,5 +1,6 @@
+import path from "path";
 import express from "express";
-import log from "crawler/Log";
+import log from "../crawler/Log";
 
 interface Server{
   app: express.Express;
@@ -10,6 +11,8 @@ class Server{
     this.app = express();
 
     this.app.set("view engine","ejs");
+    this.app.set("views",path.join(__dirname,"/views"));
+
     this.app.listen(port,()=>{
       log.info(`${port}番ポートで起動しました`);
     });
