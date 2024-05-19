@@ -70,17 +70,19 @@ class Crawler{
 
     if(!config.isOverWrite&&this.isAccessed(url)) return;
 
-    const saveId: string = utils.createId(url.pathname+url.search);
+    const path = utils.parseFilePath(url.pathname)+url.search;
+    const id: string = utils.createId(path);
 
-    await this.getThumbnail(page,saveId);
-    await this.getPDF(page,saveId);
+    await this.getThumbnail(page,id);
+    await this.getPDF(page,id);
 
     this.manager.addPage({
-      path: utils.parseFilePath(url.pathname)+url.search,
+      path: path,
+      id: id,
       title: await page.title(),
       description: await this.getDescription(page),
-      thumbnail: this.manager.getThumbnailPath(saveId),
-      view: this.manager.getPDFPath(saveId),
+      thumbnail: this.manager.getThumbnailPath(id),
+      view: this.manager.getPDFPath(id),
       links: links,
       images: await this.getImages(page),
       createAt: new Date()

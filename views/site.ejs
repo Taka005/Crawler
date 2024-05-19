@@ -4,31 +4,33 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Webクローラー</title>
+        <title><%= host %></title>
     </head>
     <body>
-	    <h1>サイト一覧</h1>
+	    <h1><%= host %></h1>
         <table>
             <thead>
                 <tr>
-                    <th scope="col">ホスト</th>
-                    <th scope="col">ページ数</th>
+                    <th scope="col">パス</th>
+                    <th scope="col">タイトル</th>
+                    <th scope="col">説明</th>
                     <th scope="col">詳細</th>
                 </tr>
             </thead>
             <tbody>
-                <% Object.values(index).forEach(data=>{ %>
+                <% pages.forEach(page=>{ %>
                     <tr>
-                        <th scope="row"><%= data.host %></th>
-                        <td><%= data.pages.length %></td>
-                        <td><a href="/site/<%= data.host %>">詳細へ移動</a></td>
+                        <th scope="row"><%= page.path %></th>
+                        <td><%= page.title || "なし" %></td>
+                        <td><%= page.description || "なし" %></td>
+                        <td><a href="/site/<%= host %>/page/<%= page.id %>">詳細へ移動</a></td>
                     </tr>
                 <% }); %>       
             </tbody>
             <tfoot>
                 <tr>
                     <th scope="row" colspan="2">合計</th>
-                    <td><%= Object.values(index).length %></td>
+                    <td><%= pages.length %></td>
                 </tr>
             </tfoot>
         </table>          

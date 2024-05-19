@@ -15,6 +15,7 @@ type SiteData = {
 
 type PageData = {
   path: string;
+  id: string;
   title: string | null;
   description: string | null;
   thumbnail: string;

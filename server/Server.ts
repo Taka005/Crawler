@@ -13,6 +13,7 @@ type SiteData = {
 
 type PageData = {
   path: string;
+  id: string;
   title: string | null;
   description: string | null;
   thumbnail: string;
@@ -31,7 +32,7 @@ class Server{
     this.app = express();
 
     this.app.set("view engine","ejs");
-    this.app.use(express.static("public"));
+    this.app.use(express.static("storage"));
 
     this.app.listen(port,()=>{
       log.info(`${port}番ポートで起動しました`);
@@ -46,6 +47,24 @@ class Server{
     this.app.get("/",(req: express.Request,res: express.Response)=>{
       res.render("index",{
         index: this.getIndex()
+      });
+    });
+
+    this.app.get("/site/:host",(req: express.Request,res: express.Response)=>{
+      if(!req.params.host) return;
+
+      res.render("site",{
+        host: req.params.host,
+        pages: this.getPages(req.params.host) || []
+      });
+    });
+
+    this.app.get("/site/:host/page/:id",(req: express.Request,res: express.Response)=>{
+      if(!req.params.host||!req.params.id) return;
+
+      res.render("page",{
+        host: req.params.host,
+        page: this.getPage(req.params.host,req.params.id) || []
       });
     });
 
@@ -71,6 +90,20 @@ class Server{
 
   getIndex(): IndexData{
     return JSON.parse(fs.readFileSync("./storage/index.json","utf8"));
+  }
+
+  getPages(host: string): PageData[] | null{
+    const index: IndexData = this.getIndex();
+    if(!index[host]) return null;
+
+    return index[host].pages || null;
+  }
+
+  getPage(host: string,id: string): PageData | null{
+    const pages: PageData[] | null = this.getPages(host);
+    if(!pages) return null;
+
+    return pages.find(page=>page.id === id) || null;
   }
 }
 
