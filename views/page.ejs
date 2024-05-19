@@ -7,6 +7,32 @@
         <title><%= host + page.path %></title>
     </head>
     <body>
-	    <h1><%= host + page.path %></h1>  
+	    <h1><%= host + page.path %></h1>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">パス</th>
+                    <th scope="col">タイトル</th>
+                    <th scope="col">説明</th>
+                    <th scope="col">サムネイル</th>
+                    <th scope="col">PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row"><%= page.path %></th>
+                    <td><%= page.title || "なし" %></td>
+                    <td><%= page.description || "なし" %></td>
+                    <td><a href="/<%= host %>/<%= page.id %>.png"><%= page.id %>.png</a></td>
+                    <td><a href="/<%= host %>/<%= page.id %>.pdf"><%= page.id %>.pdf</a></td>
+                </tr>   
+            </tbody>
+        </table>
+        <div>
+            <h2>リンク</h2>
+            <% page.links.forEach(link=>{ %>
+                <a href="<%= link %>"><%= link %></a>
+            <% }); %>
+        </div>
     </body>
 </html>

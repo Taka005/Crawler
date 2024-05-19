@@ -14,12 +14,15 @@ interface Crawler{
 }
 
 class Crawler{
-  constructor(browser: Browser,url: string){
+  constructor(browser: Browser,link: string){
     this.browser = browser;
-
     this.links = new LinkManager();
-    this.links.add(url);
-    this.host = new URL(url).hostname;
+
+    const url: URL = new URL(link);
+    this.host = url.hostname;
+
+    const newLink = `${url.origin}${utils.parseFilePath(url.pathname)}${url.search}`;
+    this.links.add(newLink);
 
     this.manager = new FileManager(this.host);
 
@@ -38,8 +41,8 @@ class Crawler{
         .map(async(link)=>{
           if(link.isComplete) return;
 
-          this.run(new URL(link.url));
           link.setComplete(true);
+          await this.run(new URL(link.url));
         });
     },config.crawlInterval);
   }
@@ -63,9 +66,12 @@ class Crawler{
 
     const links: string[] = await this.getLinks(page,url);
     links.forEach(link=>{
-      if(this.links.get(link)) return;
+      const url: URL = new URL(link);
+      const newLink = `${url.origin}${utils.parseFilePath(url.pathname)}${url.search}`;
 
-      this.links.add(link);
+      if(this.links.get(newLink)) return;
+
+      this.links.add(newLink);
     });
 
     if(!config.isOverWrite&&this.isAccessed(url)) return;
@@ -81,8 +87,6 @@ class Crawler{
       id: id,
       title: await page.title(),
       description: await this.getDescription(page),
-      thumbnail: this.manager.getThumbnailPath(id),
-      view: this.manager.getPDFPath(id),
       links: links,
       images: await this.getImages(page),
       createAt: new Date()
