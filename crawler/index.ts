@@ -9,7 +9,7 @@ type CrawlOption = {
 const program: Command = new Command();
 
 program
-  .option("-u, --url <url>","クロールするURL")
+  .requiredOption("-u, --url <url>","クロールするURL")
   .action(async(options: CrawlOption)=>{
     const url: string = options.url;
 

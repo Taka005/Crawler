@@ -61,7 +61,7 @@ class Crawler{
 
     await this.scrollAll(page);
 
-    const links = await this.getLinks(page,url);
+    const links: string[] = await this.getLinks(page,url);
     links.forEach(link=>{
       if(this.links.get(link)) return;
 
@@ -77,7 +77,7 @@ class Crawler{
 
     this.manager.addPage({
       path: utils.parseFilePath(url.pathname)+url.search,
-      title: await this.getTitle(page),
+      title: await page.title(),
       description: await this.getDescription(page),
       thumbnail: this.manager.getThumbnailPath(saveId),
       view: this.manager.getPDFPath(saveId),
@@ -100,12 +100,6 @@ class Crawler{
   async getPDF(page: Page,id: string): Promise<void>{
     await page.emulateMediaType("screen");
     await page.pdf({ path: this.manager.getPDFPath(id) });
-  }
-
-  async getTitle(page: Page): Promise<string | null>{
-    return await page.evaluate(async()=>{
-      return document.title || null;
-    });
   }
 
   async getDescription(page: Page): Promise<string | null>{
