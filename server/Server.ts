@@ -1,8 +1,29 @@
+import fs from "fs";
 import express from "express";
 import log from "../crawler/Log";
 
 interface Server{
   app: express.Express;
+}
+
+type SiteData = {
+  host: string;
+  pages: PageData[]
+}
+
+type PageData = {
+  path: string;
+  title: string | null;
+  description: string | null;
+  thumbnail: string;
+  view: string;
+  links: string[];
+  images: string[];
+  createAt: Date;
+}
+
+type IndexData = {
+  [key: string]: SiteData;
 }
 
 class Server{
@@ -23,7 +44,9 @@ class Server{
     });
 
     this.app.get("/",(req: express.Request,res: express.Response)=>{
-      res.render("index");
+      res.render("index",{
+        index: this.getIndex()
+      });
     });
 
     this.app.use((req: express.Request,res: express.Response)=>{
@@ -44,6 +67,10 @@ class Server{
         }
       });
     });
+  }
+
+  getIndex(): IndexData{
+    return JSON.parse(fs.readFileSync("./storage/index.json","utf8"));
   }
 }
 

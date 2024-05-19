@@ -7,6 +7,50 @@
         <title>Webクローラー</title>
     </head>
     <body>
-	    <h1>テスト</h1>
+	    <h1>サイト一覧</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">ホスト</th>
+                    <th scope="col">ページ数</th>
+                    <th scope="詳細"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% index.forEach(data=>{ %>
+                    <tr>
+                        <th scope="row">Chris</th>
+                        <td>HTML tables</td>
+                        <td>22</td>
+                    </tr>
+                <% }); %>
+                <tr>
+                    <th scope="row">Chris</th>
+                    <td>HTML tables</td>
+                    <td>22</td>
+                </tr>
+                <tr>
+                    <th scope="row">Dennis</th>
+                    <td>Web accessibility</td>
+                    <td>45</td>
+                </tr>
+                <tr>
+                    <th scope="row">Sarah</th>
+                    <td>JavaScript frameworks</td>
+                    <td>29</td>
+                </tr>
+                <tr>
+                    <th scope="row">Karen</th>
+                    <td>Web performance</td>
+                    <td>36</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th scope="row" colspan="2">合計</th>
+                    <td>33</td>
+                </tr>
+            </tfoot>
+        </table>          
     </body>
 </html>
